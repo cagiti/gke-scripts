@@ -1,3 +1,5 @@
+#!/usr/bin/env groovy
+
 String.metaClass.json = { new groovy.json.JsonSlurper().parseText(delegate) }
 
 def serviceAccounts = "gcloud iam service-accounts list --format=json".execute().text.json().

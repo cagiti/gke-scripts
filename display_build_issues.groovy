@@ -1,3 +1,5 @@
+#!/usr/bin/env groovy
+
 def hideCompleted = args.contains("--hide-completed")
 def hideErrored = args.contains("--hide-errored")
 

@@ -1,3 +1,5 @@
+#!/usr/bin/env groovy
+
 def buckets = "gsutil ls".execute().text.split("\n").findAll{ it.startsWith('gs://jenkinsx-dev') && it.endsWith('-terraform-state/') }
 buckets.each { bucket ->
 	def clusterName = bucket.replaceAll('gs://jenkinsx-dev-','').replaceAll('-terraform-state/','')
