@@ -30,7 +30,7 @@ pods.each { pod ->
 	def description = "kubectl describe pod ${pod.name}".execute().text
 	def repo = (description.split('\n').find{ it.contains('REPO_NAME') } ?: "").replace("REPO_NAME:","").trim()
 	def branch = (description.split('\n').find{ it.contains('BRANCH_NAME') } ?: "").replace("BRANCH_NAME:","").trim()
-	def buildNumber = (description.split('\n').find{ it.contains('JX_BUILD_NUMBER') } ?: "").replace("JX_BUILD_NUMBER:","").trim()
+	def buildNumber = (description.split('\n').findAll{ !it.contains('BUILD_NUMBER') }.find{ it.contains('BUILD_ID') } ?: "").replace("BUILD_ID:","").trim()
 
     if (repo == "" && branch == "" ) {
 		println "\tupgrade"
