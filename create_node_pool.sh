@@ -1,12 +1,12 @@
 #!/bin/bash
 
 CLUSTER=jenkins-x-infra-production
-NAME=pool-2
+NAME=pool-3
 DISK_SIZE=200
 ZONE=europe-west1-b
 MIN_NODES=3
 MAX_NODES=10
-MACHINE_TYPE=n1-highcpu-4
+MACHINE_TYPE=n1-standard-4
 
 gcloud container node-pools create $NAME \
         --cluster=$CLUSTER \
