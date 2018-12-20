@@ -5,8 +5,7 @@ def hideErrored = args.contains("--hide-errored")
 
 def pods = []
 def numberOfBuilds = 14
-
-def podDescriptions = "kubectl get pods --sort-by=.status.startTime".execute().text.split('\n').reverse().toList().findAll{ it ==~ /^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}-\w{5}.*/ }
+def podDescriptions = "kubectl get pods --sort-by=.status.startTime".execute().text.split('\n').reverse().toList().findAll{ it ==~ /^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}-\w{3}-\w{5}.*/ }
 
 if (hideCompleted) {
 	podDescriptions = podDescriptions.findAll{ !it.contains("Completed") }
