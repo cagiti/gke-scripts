@@ -54,18 +54,27 @@ http.request(POST, JSON) {
 }
 
 issues.each { 
-	def issueUrl = it.gh.replaceAll('https://github.com/','') 
-	def ghIssue = "https://${gitAuth.user}:${gitAuth.oauth_token}@api.github.com/repos/${issueUrl}".toURL().text.json()
-	if (ghIssue.state == 'closed' && it.status == 'Done') {
-		//nothing to see here
-	} else if (ghIssue.state == 'closed') {
-		println "---------------------------"
-		println "ISSUE NEEDS UPDATING - https://cloudbees.atlassian.net/browse/${it.id}"
-		println "${it.gh} is marked as ${ghIssue.state}"
+	def issueUrl = it.gh.replaceAll('https://github.com/','')
+	if (!issueUrl.contains('pull')) { 
+		def ghIssue = "https://${gitAuth.user}:${gitAuth.oauth_token}@api.github.com/repos/${issueUrl}".toURL().text.json()
+		if (ghIssue.state == 'closed' && it.status == 'Done') {
+			//nothing to see here
+		} else if (ghIssue.state == 'closed') {
+			println "I--------------------------"
+			println "ISSUE NEEDS UPDATING - https://cloudbees.atlassian.net/browse/${it.id}"
+			println "${it.gh} is marked as ${ghIssue.state}"
+		} else {
+			println "I--------------------------"
+			println it
+			println ghIssue.title
+			println ghIssue.state
+		}
 	} else {
-		println "---------------------------"
+		println "P--------------------------"
+		def pullUrl = it.gh.replaceAll('https://github.com/','')
+		def ghPull = "https://${gitAuth.user}:${gitAuth.oauth_token}@api.github.com/repos/${pullUrl}".replace('/pull/','/pulls/').toURL().text.json()
 		println it
-		println ghIssue.state
-
+		println ghPull.title
+		println ghPull.state
 	}
 }
