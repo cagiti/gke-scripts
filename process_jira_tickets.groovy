@@ -1,3 +1,5 @@
+#!/usr/bin/env groovy
+
 @Grapes([
 	@Grab('org.yaml:snakeyaml:1.17'),
 	@Grab('commons-beanutils:commons-beanutils:1.9.3'),
