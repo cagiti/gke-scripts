@@ -65,7 +65,7 @@ issues.each {
 	updatedIssue['github_url'] = it.gh
 
 	if (!issueUrl.contains('pull')) { 
-		def ghIssue = "https://${gitAuth.user}:${gitAuth.oauth_token}@api.github.com/repos/${issueUrl}".toURL().text.json()
+		def ghIssue = "curl https://${gitAuth.user}:${gitAuth.oauth_token}@api.github.com/repos/${issueUrl}".execute().text.json()
 		def issueKind = ghIssue.labels.find{ label -> label.name.startsWith('kind')}?.name
 		def issuePriority = ghIssue.labels.find{ label -> label.name.startsWith('priority')}?.name
 		updatedIssue['kind'] = issueKind
@@ -85,12 +85,8 @@ issues.each {
 			}
 		}
 	} else {
-		//println "--------------------------"
 		def pullUrl = it.gh.replaceAll('https://github.com/','')
-		def ghPull = "https://${gitAuth.user}:${gitAuth.oauth_token}@api.github.com/repos/${pullUrl}".replace('/pull/','/pulls/').toURL().text.json()
-		//println it
-		//println ghPull.title
-		//println ghPull.state
+		def ghPull = "curl https://${gitAuth.user}:${gitAuth.oauth_token}@api.github.com/repos/${pullUrl}".replace('/pull/','/pulls/').execute().text.json()
 	}
 	enhancedIssues << updatedIssue
 }
