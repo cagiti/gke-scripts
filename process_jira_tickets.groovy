@@ -48,52 +48,65 @@ http.request(POST, JSON) {
     requestContentType = ContentType.JSON
 
     response.success = { resp, json ->
-        println "Found ${json.total} issue(s)"
+        println "Found ${json.total} issue(s) in Jira"
 		json.issues.each { issues << [id:it.key, gh:it.fields.customfield_12684, status:it.fields.status.name] }
     }
 }
 
 def int complete, requireClosing, requireTriage
 
-issues.each { 
+def enhancedIssues = []
+
+issues.each {
+	def updatedIssue = [:] 
 	def issueUrl = it.gh.replaceAll('https://github.com/','')
+	
+	updatedIssue['id'] = it.id
+	updatedIssue['github_url'] = it.gh
+
 	if (!issueUrl.contains('pull')) { 
 		def ghIssue = "https://${gitAuth.user}:${gitAuth.oauth_token}@api.github.com/repos/${issueUrl}".toURL().text.json()
 		def issueKind = ghIssue.labels.find{ label -> label.name.startsWith('kind')}?.name
 		def issuePriority = ghIssue.labels.find{ label -> label.name.startsWith('priority')}?.name
+		updatedIssue['kind'] = issueKind
+		updatedIssue['priority'] = issuePriority
+		updatedIssue['title'] = ghIssue.title
+		updatedIssue['github_state'] = ghIssue.state
 		
 		if (ghIssue.state == 'closed' && it.status == 'Done') {
-			complete++
+			updatedIssue['action'] = 'complete'
 		} else if (ghIssue.state == 'closed') {
-			println "--------------------------"
-			println "ISSUE NEEDS UPDATING - https://cloudbees.atlassian.net/browse/${it.id}"
-			println "${it.gh} is marked as ${ghIssue.state}"
-			requireClosing++
+			updatedIssue['action'] = 'requires_closing'
 		} else {
-			println "--------------------------"
-			println it
-			println ghIssue.title
-			println ghIssue.state
-			if (issueKind) {
-				println issueKind
-			}
  			if (issuePriority) {
-				println issuePriority
+				updatedIssue['action'] = 'open'
 			} else {
-				println "ISSUE NEEDS TRIAGE"
-				requireTriage++
+				updatedIssue['action'] = 'requires_triage'
 			}
 		}
 	} else {
-		println "--------------------------"
+		//println "--------------------------"
 		def pullUrl = it.gh.replaceAll('https://github.com/','')
 		def ghPull = "https://${gitAuth.user}:${gitAuth.oauth_token}@api.github.com/repos/${pullUrl}".replace('/pull/','/pulls/').toURL().text.json()
-		println it
-		println ghPull.title
-		println ghPull.state
+		//println it
+		//println ghPull.title
+		//println ghPull.state
 	}
+	enhancedIssues << updatedIssue
 }
 
-println "${complete} issue(s) complete"
-println "${requireClosing} issue(s) requires closing"
-println "${requireTriage} issue(s) requires triage"
+println "---------- COMPLETE ----------"
+enhancedIssues.findAll{ it.action == 'complete' }.each{ println it }
+
+println ""
+println "---------- REQUIRES CLOSING ----------"
+enhancedIssues.findAll{ it.action == 'requires_closing' }.each{ println it }
+
+println ""
+println "---------- REQUIRES TRIAGE ----------"
+enhancedIssues.findAll{ it.action == 'requires_triage' }.each{ println it }
+
+println ""
+println "---------- OPEN ----------"
+enhancedIssues.findAll{ it.action == 'open' }.each{ println it }
+
