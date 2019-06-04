@@ -43,7 +43,8 @@ while (moreIssues) {
 		def issueKind = it.labels.find{ label -> label.name.startsWith('kind')}?.name
 		def issuePriority = it.labels.find{ label -> label.name.startsWith('priority')}?.name
 		def issueArea = it.labels.find{ label -> label.name.startsWith('area')}?.name
-		issues << [id:it.html_url, title: it.title, state:it.state, kind:issueKind, priority:issuePriority, area:issueArea, created_at: it.created_at?.toDate(), closed_at: it.closed_at?.toDate()]
+		def issueLifecycle = it.labels.find{ label -> label.name.startsWith('lifecycle')}?.name
+		issues << [id:it.html_url, title: it.title, state:it.state, kind:issueKind, priority:issuePriority, area:issueArea, lifecycle:issueLifecycle, created_at: it.created_at?.toDate(), closed_at: it.closed_at?.toDate()]
 	}
 
 	page++
@@ -53,8 +54,6 @@ while (moreIssues) {
 	}
 }
 
-issues.findAll{ it.state == "open" }.findAll{ !it.priority }.each{ println it }
-
 def numberOfIssues = issues.size()
 def numberOfOpenIssues = issues.findAll{ it.state == "open" }.size()
 def numberOfOpenIssuesExcludingEnhancements = issues.findAll{ it.state == "open" }.findAll{ it.kind != "kind/enhancement" }.size()
@@ -63,18 +62,32 @@ def toTriage = issues.findAll{ it.state == "open" }.findAll{ !it.priority }.size
 def timeToResolve = issues.findAll{ it.state == 'closed' }.findAll{ it.kind != "kind/enhancement" }.collect{ 
 	TimeCategory.minus(it.closed_at, it.created_at).days
 }
+
 println ""
 println "Average time to close ${timeToResolve.sum()/timeToResolve.size()} day(s)"
 
+def filter = issues.collect{ it.priority }.findAll{ it }.unique().collect{ "-label%3A${it.replace('/','%2F')}" }.join('+')
+
 println ""
 println "Total issue(s) ${numberOfIssues}"
-println "To triage ${toTriage}"
+println "Total open issue(s) ${numberOfOpenIssues}"
+println "To triage ${toTriage} - https://github.com/jenkins-x/jx/issues?q=is%3Aissue+is%3Aopen+${filter}"
 println "Triage ${((numberOfOpenIssues-toTriage)/numberOfOpenIssues)*100}%"
 println "% of open issues ${((numberOfOpenIssuesExcludingEnhancements)/numberOfIssues)*100}%"
 println ""
 
-issues.findAll{ it.priority }.groupBy{ it.priority }.each{ k,v -> println "${k} - ${v.size()}" }
+issues.findAll{ it.state == "open" }.
+       findAll{ it.priority }.
+       groupBy{ it.priority }.
+       each{ k,v -> println "${k} - ${v.size()} - https://github.com/jenkins-x/jx/issues?q=is%3Aissue+is%3Aopen+label%3A${k.replace('/','%2F')}" }
+
 println ""
-issues.findAll{ it.kind }.groupBy{ it.kind }.each{ k,v -> println "${k} - ${v.size()}" }
-//println ""
-//issues.findAll{ it.area }.groupBy{ it.area }.each{ k,v -> println "${k} - ${v.size()}" }
+issues.findAll{ it.state == "open" }.
+       findAll{ it.kind }.
+       groupBy{ it.kind }.
+       each{ k,v -> println "${k} - ${v.size()} - https://github.com/jenkins-x/jx/issues?q=is%3Aissue+is%3Aopen+label%3A${k.replace('/','%2F')}" }
+
+println ""
+issues.findAll{ it.state == "open" }.
+       groupBy{ it.lifecycle }.
+       each{ k,v -> println "${k} - ${v.size()} - https://github.com/jenkins-x/jx/issues?q=is%3Aissue+is%3Aopen+label%3A${k?:'Open'.replace('/','%2F')}" }
