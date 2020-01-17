@@ -17,9 +17,9 @@ images = pods.items.findAll{ pod ->
 	[ app: pod.metadata.labels.app, image: container.image ]}
 }.flatten().unique()
 
-images.groupBy{ it.app }.each{ k, v -> 
+images.groupBy{ it.app }.sort{ it.key }.each{ k, v -> 
 	println "${k}"
-	v.each {
+	v.sort().each {
 		println "\t${it.image}"
 	}
 }
