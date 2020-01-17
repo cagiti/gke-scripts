@@ -17,19 +17,9 @@ images = pods.items.findAll{ pod ->
 	[ app: pod.metadata.labels.app, image: container.image ]}
 }.flatten().unique()
 
-//jxImages = images.
-//	findAll{ image -> image.image.contains('builder') || image.image.contains('jx') }.
-//	findAll{ image -> !image.image.contains('abayer') }.
-//	findAll{ image -> !image.image.contains('jxui') }
-
 images.groupBy{ it.app }.each{ k, v -> 
 	println "${k}"
-	//if (it.image.contains('builder')) {
-	//	def version = "docker run ${it.image} jx --version".execute().text.trim()
-	//	println "\t${it.image} -> ${version}"
-	//} else {
 	v.each {
 		println "\t${it.image}"
 	}
-	//} 
 }
