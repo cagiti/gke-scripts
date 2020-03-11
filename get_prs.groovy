@@ -61,7 +61,14 @@ Yaml parser = new Yaml()
 
 
 def home = new File(System.getenv('HOME'))
-def git = parser.load(new File(home,".config/hub").text)
+def config = new File(home,".config/hub")
+if (!config.exists()) {
+	println "${config.color(RED)} doesn't exist"
+	println "Please ensure you have the hub cli installed and configured"
+	System.exit(1)
+}
+
+def git = parser.load(config.text)
 def gitAuth = git.'github.com'.get(0)
 
 def prs = []
