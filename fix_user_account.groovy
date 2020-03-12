@@ -13,7 +13,7 @@ def list = []
 def users = "kubectl get users -oyaml".execute().text.yaml()
 users.items.each{ user -> 
 	def binding = "kubectl get clusterrolebinding ${user.spec.serviceAccount} -oyaml".execute().text.yaml()
-	list << [name: user.spec.name, email: user.spec.email, role: binding.roleRef.name, sa: user.spec.serviceAccount]
+	list << [name: user.spec.name, email: user.spec.email, role: binding?.roleRef?.name, sa: user.spec.serviceAccount]
 }
 
 println "Viewers"
@@ -24,7 +24,7 @@ println "\n\nAdmin"
 println "----------------------------------------"
 list.findAll{ it.role == "cluster-admin" }.each{ println it }
 
-def reservedEmails = ["wrefvem@cloudbees.com", "rawlingsj80@gmail.com", "james.strachan@gmail.com", "cosmin.cojocar@gmx.ch", "pmuir@cloudbees.com", "gareth@bryncynfelin.co.uk"]
+def reservedEmails = ["warren@warrenbailey.net", "wrefvem@cloudbees.com", "rawlingsj80@gmail.com", "james.strachan@gmail.com", "cosmin.cojocar@gmx.ch", "pmuir@cloudbees.com", "gareth@bryncynfelin.co.uk"]
 
 def usersToUpdate = list.findAll{ it.role == 'cluster-admin' }.findAll{ !reservedEmails.contains(it.email) }
 

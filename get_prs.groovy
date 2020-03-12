@@ -1,9 +1,7 @@
 #!/usr/bin/env groovy
 
 @Grapes([
-    @Grab('org.yaml:snakeyaml:1.17'),
-    @Grab('commons-beanutils:commons-beanutils:1.9.3'),
-    @Grab('org.codehaus.groovy.modules.http-builder:http-builder:0.7.1')
+    @Grab('org.yaml:snakeyaml:1.17')
 ])
 
 import groovy.time.*
@@ -46,11 +44,11 @@ String.metaClass.color = { ansiValue ->
 }
 
 String.metaClass.left = { length ->
-	delegate.padLeft(length, " ")
+	sprintf("%${length}s", delegate)
 }
 
 String.metaClass.right = { length ->
-	delegate.padRight(length, " ")
+	sprintf("%-${length}s", delegate)
 }
 
 String.metaClass.json = {
@@ -141,7 +139,7 @@ repos.each{ repo ->
                 } else if (state == "success") {
                     colouredTitle = title.color(GREEN)
                 }
-                println "${pr.right(18)}${user.right(15)}${colouredTitle.right(100)}${labels.join(", ")}"
+                println "${pr.right(15)}${user.right(15)}${colouredTitle.right(100)}${labels.join(", ")}"
             }
         }
 

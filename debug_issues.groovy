@@ -20,7 +20,7 @@ def per_page = 100
 def orgs = ['jenkins-x','jenkins-x-charts','jenkins-x-apps','jenkins-x-buildpacks','jenkins-x-images','jenkins-x-quickstarts']
 
 def data = []
-def showUrl = true
+def showUrl = false
 
 orgs.each { org -> 
 	def repos = "curl https://${gitAuth.user}:${gitAuth.oauth_token}@api.github.com/orgs/${org}/repos?per_page=${per_page}&page=${page}".execute().text.json()
