@@ -45,6 +45,14 @@ String.metaClass.color = { ansiValue ->
     ansiValue + delegate + NORMAL
 }
 
+String.metaClass.left = { length ->
+	delegate.padLeft(length, " ")
+}
+
+String.metaClass.right = { length ->
+	delegate.padRight(length, " ")
+}
+
 String.metaClass.json = {
     new JsonSlurper().parseText(delegate)
 }
@@ -133,7 +141,7 @@ repos.each{ repo ->
                 } else if (state == "success") {
                     colouredTitle = title.color(GREEN)
                 }
-                println "${pr}\t${user}\t${colouredTitle}\t${labels.join(", ")}"
+                println "${pr.right(18)}${user.right(15)}${colouredTitle.right(100)}${labels.join(", ")}"
             }
         }
 
