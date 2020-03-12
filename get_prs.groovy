@@ -7,11 +7,6 @@
 import groovy.time.*
 import groovy.json.*
 import org.yaml.snakeyaml.Yaml
-import groovyx.net.http.HTTPBuilder
-import static groovyx.net.http.ContentType.URLENC
-import groovyx.net.http.ContentType
-import static groovyx.net.http.ContentType.*
-import static groovyx.net.http.Method.*
 
 def NORMAL = "\u001B[0m"
 def BOLD = "\u001B[1m"
