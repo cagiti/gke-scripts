@@ -77,7 +77,8 @@ def morePRs = true
 def page = 1
 def per_page = 100
 def printRepo = true
-def ignoredLabels = ["do-not-merge/hold", "do-not-merge/work-in-progress"]
+def ignoredLabels = ["dependencies", "do-not-merge/hold", "do-not-merge/work-in-progress"]
+def ignoredContexts = ["tide", "keeper", "Lighthouse Merge Status"]
 
 def repos = ["cloudbees/arcalos",
     "cloudbees/arcalos-config",
@@ -92,6 +93,7 @@ def repos = ["cloudbees/arcalos",
     "cloudbees/jx-arcalos-role-controller",
     "arcalos-environments/environment-raccoonshimmer-dev",
     "arcalos-environments/environment-hornberyl-dev",
+    "arcalos-management/environment-arcalos-staging-mgmt-dev",
     "arcalos-management/environment-arcalos-prod-mgmt-dev"]
 
 repos.each{ repo ->
@@ -103,7 +105,6 @@ repos.each{ repo ->
         def ghIssues = "curl https://${gitAuth.user}:${gitAuth.oauth_token}@api.github.com/repos/${repo}/pulls?state=open&per_page=${per_page}&page=${page}".execute().text.json()
 
         ghIssues.each{ 
-
             def statuses_url = it.statuses_url.replaceAll('https://', '').replaceAll('statuses','commits') + "/status"
             def title = it.title
             def user = it.user.login
@@ -120,7 +121,7 @@ repos.each{ repo ->
                 def pr = "#${it.number}".color(GREEN)
                 def state = statuses.state
                 if (state == "pending") {
-                    def nonTideStatus = statuses.statuses.findAll{ it.context != "tide" }.collect{ it.state }.unique()
+                    def nonTideStatus = statuses.statuses.findAll{ !ignoredContexts.contains(it.context) }.collect{ it.state }.unique()
                     if (!nonTideStatus.contains('pending')) {
                         state = "success"    
                     }
@@ -134,7 +135,7 @@ repos.each{ repo ->
                 } else if (state == "success") {
                     colouredTitle = title.color(GREEN)
                 }
-                println "${pr.right(15)}${user.right(15)}${colouredTitle.right(100)}${labels.join(", ")}"
+                println "${pr.right(15)}${user.right(25)}${colouredTitle.right(100)}${labels.join(", ")}"
             }
         }
 
